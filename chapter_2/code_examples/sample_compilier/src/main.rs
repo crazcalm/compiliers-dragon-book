@@ -3,6 +3,8 @@ use std::fs::File;
 use std::io::Read;
 use std::process::ExitCode;
 
+use std::collections::VecDeque;
+
 mod feed;
 
 use crate::feed::Feed;
@@ -18,6 +20,10 @@ fn get_input_string(path: &str) -> String {
 pub enum TokenType {
     NUM,
     ID,
+    PLUS,
+    MINUS,
+    EQUAL,
+    SEMICOLON,
 }
 
 type Token = (TokenType, String);
@@ -53,7 +59,7 @@ impl SymbolTable {
     }
 }
 
-fn lexan(mut input_feed: impl feed::Feed, SymbolTable: impl SymbolTableTrait) {
+fn lexan(mut input_feed: impl feed::Feed, SymbolTable: impl SymbolTableTrait) -> Vec<Token> {
     let mut results = Vec::new();
     let mut lineno = 1;
 
@@ -103,10 +109,52 @@ fn lexan(mut input_feed: impl feed::Feed, SymbolTable: impl SymbolTableTrait) {
                 }
             }
             results.push((TokenType::ID, tempt));
+        } else if character.eq(&'-') {
+            results.push((TokenType::MINUS, character.to_string()));
+        } else if character.eq(&'+') {
+            results.push((TokenType::PLUS, character.to_string()));
+        } else if character.eq(&'=') {
+            results.push((TokenType::EQUAL, character.to_string()));
+        } else if character.eq(&';') {
+            results.push((TokenType::SEMICOLON, character.to_string()));
         }
     }
 
     println!("{:?}", results);
+    results
+}
+
+struct Parser {
+    tokens: VecDeque<Token>,
+    look_ahead: Option<Token>,
+}
+
+impl Parser {
+    pub fn new(tokens: Vec<Token>) -> Self {
+        let mut tokens_vecdeq = VecDeque::new();
+
+        for item in tokens {
+            tokens_vecdeq.push_back(item);
+        }
+
+        Parser {
+            tokens: tokens_vecdeq,
+            look_ahead: None,
+        }
+    }
+
+    pub fn parse(&mut self) {
+        self.look_ahead = self.tokens.pop_front();
+
+        while self.look_ahead.is_some() {
+            self.expr();
+            self.match_token((TokenType::SEMICOLON, ";".to_string()));
+        }
+    }
+
+    pub fn expr(&mut self) {}
+
+    pub fn match_token(&mut self, wanted_token: Token) {}
 }
 
 fn main() -> ExitCode {
