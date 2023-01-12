@@ -53,6 +53,62 @@ impl SymbolTable {
     }
 }
 
+fn lexan(mut input_feed: impl feed::Feed, SymbolTable: impl SymbolTableTrait) {
+    let mut results = Vec::new();
+    let mut lineno = 1;
+
+    loop {
+        let mut character = match input_feed.get_char() {
+            Some(input) => input,
+            None => break,
+        };
+
+        if character.eq(&' ') || character.eq(&'\t') {
+            continue;
+        } else if character.eq(&'\n') {
+            lineno += 1;
+            continue;
+        } else if character.is_ascii_digit() {
+            let mut tempt = character.to_string();
+
+            loop {
+                match input_feed.get_char() {
+                    Some(next_char) => character = next_char,
+                    None => break,
+                };
+
+                if character.is_ascii_digit() {
+                    tempt.push(character);
+                } else {
+                    input_feed.unget_char().unwrap();
+                    break;
+                }
+            }
+
+            results.push((TokenType::NUM, tempt));
+        } else if character.is_alphabetic() {
+            let mut tempt = character.to_string();
+
+            loop {
+                match input_feed.get_char() {
+                    Some(next_char) => character = next_char,
+                    None => break,
+                };
+
+                if character.is_alphanumeric() {
+                    tempt.push(character);
+                } else {
+                    input_feed.unget_char().unwrap();
+                    break;
+                }
+            }
+            results.push((TokenType::ID, tempt));
+        }
+    }
+
+    println!("{:?}", results);
+}
+
 fn main() -> ExitCode {
     let mut args = env::args();
     let input_string: String;
@@ -66,13 +122,9 @@ fn main() -> ExitCode {
     }
 
     let mut input_feed = feed::InputFeed::new(input_string);
-    for _ in 0..10 {
-        print!("{:?}", input_feed.get_char());
-    }
-    println!();
-    for _ in 0..5 {
-        print!("{:?}", input_feed.unget_char());
-    }
+    let mut symbol_table = SymbolTable::new();
+
+    lexan(input_feed, symbol_table);
 
     return ExitCode::SUCCESS;
 }
