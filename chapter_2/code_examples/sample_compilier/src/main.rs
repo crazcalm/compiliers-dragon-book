@@ -16,7 +16,7 @@ fn get_input_string(path: &str) -> String {
     result
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum TokenType {
     NUM,
     ID,
@@ -24,6 +24,10 @@ pub enum TokenType {
     MINUS,
     EQUAL,
     SEMICOLON,
+    LEFT_PARATHESIS,
+    RIGHT_PARATHESIS,
+    MULTIPLY,
+    DIVIDE,
 }
 
 type Token = (TokenType, String);
@@ -113,6 +117,14 @@ fn lexan(mut input_feed: impl feed::Feed, SymbolTable: impl SymbolTableTrait) ->
             results.push((TokenType::MINUS, character.to_string()));
         } else if character.eq(&'+') {
             results.push((TokenType::PLUS, character.to_string()));
+        } else if character.eq(&'*') {
+            results.push((TokenType::MULTIPLY, character.to_string()));
+        } else if character.eq(&'/') {
+            results.push((TokenType::DIVIDE, character.to_string()));
+        } else if character.eq(&'(') {
+            results.push((TokenType::LEFT_PARATHESIS, character.to_string()));
+        } else if character.eq(&')') {
+            results.push((TokenType::RIGHT_PARATHESIS, character.to_string()));
         } else if character.eq(&'=') {
             results.push((TokenType::EQUAL, character.to_string()));
         } else if character.eq(&';') {
@@ -149,12 +161,86 @@ impl Parser {
         while self.look_ahead.is_some() {
             self.expr();
             self.match_token((TokenType::SEMICOLON, ";".to_string()));
+            // adding a new line to create space
+            println!();
         }
     }
 
-    pub fn expr(&mut self) {}
+    pub fn expr(&mut self) {
+        self.term();
+        loop {
+            let current_token = self.look_ahead.clone().unwrap();
+            match current_token.0 {
+                TokenType::PLUS | TokenType::MINUS => {
+                    self.match_token((
+                        current_token.0.clone(),
+                        current_token.1.clone().to_string(),
+                    ));
+                    self.term();
+                    print!("{}", current_token.1);
+                }
+                _ => {
+                    break;
+                }
+            }
+        }
+    }
 
-    pub fn match_token(&mut self, wanted_token: Token) {}
+    pub fn match_token(&mut self, wanted_token: Token) {
+        let current_token = self.look_ahead.clone().unwrap();
+        //println!("Wanted {:?}, Current: {:?}", &wanted_token, current_token);
+        if current_token.eq(&wanted_token) {
+            self.look_ahead = self.tokens.pop_front();
+        } else {
+            eprintln!("Wanted {:?}, Current: {:?}", wanted_token, current_token);
+            panic!("Syntax error")
+        }
+    }
+
+    pub fn term(&mut self) {
+        self.factor();
+        loop {
+            let current_token = self.look_ahead.clone().unwrap();
+            match current_token.0 {
+                TokenType::MULTIPLY | TokenType::DIVIDE => {
+                    self.match_token((
+                        current_token.0.clone(),
+                        current_token.1.clone().to_string(),
+                    ));
+                    self.factor();
+                    print!("{}", current_token.1);
+                }
+                _ => {
+                    break;
+                }
+            }
+        }
+    }
+
+    pub fn factor(&mut self) {
+        let current_token = self.look_ahead.clone().unwrap();
+        match current_token.0 {
+            TokenType::LEFT_PARATHESIS => {
+                self.match_token((TokenType::LEFT_PARATHESIS, '('.to_string()));
+                self.expr();
+                self.match_token((TokenType::RIGHT_PARATHESIS, ')'.to_string()));
+            }
+            TokenType::NUM => {
+                print!("{:?}", current_token.1);
+                self.match_token((TokenType::NUM, current_token.1.to_string()));
+            }
+            TokenType::ID => {
+                print!("{:?}", current_token.1);
+                self.match_token((TokenType::ID, current_token.1.to_string()));
+            }
+            _ => {
+                panic!(
+                    "{}",
+                    &format!("Unexpected look ahead character: {}", &current_token.1)
+                )
+            }
+        }
+    }
 }
 
 fn main() -> ExitCode {
@@ -172,7 +258,11 @@ fn main() -> ExitCode {
     let mut input_feed = feed::InputFeed::new(input_string);
     let mut symbol_table = SymbolTable::new();
 
-    lexan(input_feed, symbol_table);
+    let processed_tokens = lexan(input_feed, symbol_table);
+    println!("Processed Tokens: {:?}", &processed_tokens);
+
+    let mut parser = Parser::new(processed_tokens);
+    parser.parse();
 
     return ExitCode::SUCCESS;
 }
