@@ -26,7 +26,7 @@ impl Parser {
 
         while self.look_ahead.is_some() {
             self.expr();
-            self.match_token((TokenType::SEMICOLON, ";".to_string()));
+            self.match_token((TokenType::Semicolon, ";".to_string()));
             // adding a new line to create space
             println!();
         }
@@ -37,7 +37,7 @@ impl Parser {
         loop {
             let current_token = self.look_ahead.clone().unwrap();
             match current_token.0 {
-                TokenType::PLUS | TokenType::MINUS => {
+                TokenType::Plus | TokenType::Minus => {
                     self.match_token((
                         current_token.0.clone(),
                         current_token.1.clone().to_string(),
@@ -68,7 +68,7 @@ impl Parser {
         loop {
             let current_token = self.look_ahead.clone().unwrap();
             match current_token.0 {
-                TokenType::MULTIPLY | TokenType::DIVIDE => {
+                TokenType::Multiply | TokenType::Divide => {
                     self.match_token((
                         current_token.0.clone(),
                         current_token.1.clone().to_string(),
@@ -86,18 +86,18 @@ impl Parser {
     pub fn factor(&mut self) {
         let current_token = self.look_ahead.clone().unwrap();
         match current_token.0 {
-            TokenType::LEFT_PARATHESIS => {
-                self.match_token((TokenType::LEFT_PARATHESIS, '('.to_string()));
+            TokenType::LeftParathesis => {
+                self.match_token((TokenType::LeftParathesis, '('.to_string()));
                 self.expr();
-                self.match_token((TokenType::RIGHT_PARATHESIS, ')'.to_string()));
+                self.match_token((TokenType::RightParathesis, ')'.to_string()));
             }
-            TokenType::NUM => {
+            TokenType::Num => {
                 print!("{:?}", current_token.1);
-                self.match_token((TokenType::NUM, current_token.1.to_string()));
+                self.match_token((TokenType::Num, current_token.1.to_string()));
             }
-            TokenType::ID => {
+            TokenType::Id => {
                 print!("{:?}", current_token.1);
-                self.match_token((TokenType::ID, current_token.1.to_string()));
+                self.match_token((TokenType::Id, current_token.1.to_string()));
             }
             _ => {
                 panic!(

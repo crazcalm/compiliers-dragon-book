@@ -3,7 +3,7 @@ use crate::symbols::SymbolTableTrait;
 use crate::tokens::{Token, TokenType};
 
 
-pub fn lexan(mut input_feed: impl Feed, _SymbolTable: impl SymbolTableTrait) -> Vec<Token> {
+pub fn lexan(mut input_feed: impl Feed, _symbol_table: impl SymbolTableTrait) -> Vec<Token> {
     let mut results = Vec::new();
     let mut lineno = 1;
 
@@ -35,7 +35,7 @@ pub fn lexan(mut input_feed: impl Feed, _SymbolTable: impl SymbolTableTrait) -> 
                 }
             }
 
-            results.push((TokenType::NUM, tempt));
+            results.push((TokenType::Num, tempt));
         } else if character.is_alphabetic() {
             let mut tempt = character.to_string();
 
@@ -52,26 +52,24 @@ pub fn lexan(mut input_feed: impl Feed, _SymbolTable: impl SymbolTableTrait) -> 
                     break;
                 }
             }
-            results.push((TokenType::ID, tempt));
+            results.push((TokenType::Id, tempt));
         } else if character.eq(&'-') {
-            results.push((TokenType::MINUS, character.to_string()));
+            results.push((TokenType::Minus, character.to_string()));
         } else if character.eq(&'+') {
-            results.push((TokenType::PLUS, character.to_string()));
+            results.push((TokenType::Plus, character.to_string()));
         } else if character.eq(&'*') {
-            results.push((TokenType::MULTIPLY, character.to_string()));
+            results.push((TokenType::Multiply, character.to_string()));
         } else if character.eq(&'/') {
-            results.push((TokenType::DIVIDE, character.to_string()));
+            results.push((TokenType::Divide, character.to_string()));
         } else if character.eq(&'(') {
-            results.push((TokenType::LEFT_PARATHESIS, character.to_string()));
+            results.push((TokenType::LeftParathesis, character.to_string()));
         } else if character.eq(&')') {
-            results.push((TokenType::RIGHT_PARATHESIS, character.to_string()));
+            results.push((TokenType::RightParathesis, character.to_string()));
         } else if character.eq(&'=') {
-            results.push((TokenType::EQUAL, character.to_string()));
+            results.push((TokenType::Equal, character.to_string()));
         } else if character.eq(&';') {
-            results.push((TokenType::SEMICOLON, character.to_string()));
+            results.push((TokenType::Semicolon, character.to_string()));
         }
     }
-
-    println!("{:?}", results);
     results
 }

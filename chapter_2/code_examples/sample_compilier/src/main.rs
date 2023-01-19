@@ -37,7 +37,6 @@ fn main() -> ExitCode {
     let symbol_table = SymbolTable::new();
 
     let processed_tokens = lexan(input_feed, symbol_table);
-    println!("Processed Tokens: {:?}", &processed_tokens);
 
     let mut parser = Parser::new(processed_tokens);
     parser.parse();
