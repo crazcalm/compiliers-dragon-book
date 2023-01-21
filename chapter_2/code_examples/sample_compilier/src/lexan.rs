@@ -2,10 +2,9 @@ use crate::feed::Feed;
 use crate::symbols::SymbolTableTrait;
 use crate::tokens::{Token, TokenType};
 
-
 pub fn lexan(mut input_feed: impl Feed, _symbol_table: impl SymbolTableTrait) -> Vec<Token> {
     let mut results = Vec::new();
-    let mut lineno = 1;
+    let mut _lineno = 1;
 
     loop {
         let mut character = match input_feed.get_char() {
@@ -16,7 +15,7 @@ pub fn lexan(mut input_feed: impl Feed, _symbol_table: impl SymbolTableTrait) ->
         if character.eq(&' ') || character.eq(&'\t') {
             continue;
         } else if character.eq(&'\n') {
-            lineno += 1;
+            _lineno += 1;
             continue;
         } else if character.is_ascii_digit() {
             let mut tempt = character.to_string();
@@ -72,4 +71,70 @@ pub fn lexan(mut input_feed: impl Feed, _symbol_table: impl SymbolTableTrait) ->
         }
     }
     results
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::feed::InputFeed;
+    use crate::symbols::SymbolTable;
+    use crate::tokens::TokenType;
+
+    #[test]
+    fn test() {
+        let inputs = vec![
+            (
+                "1 + 1",
+                vec![
+                    (TokenType::Num, "1".to_string()),
+                    (TokenType::Plus, "+".to_string()),
+                    (TokenType::Num, "1".to_string()),
+                ],
+            ),
+            (
+                "1 - 2;",
+                vec![
+                    (TokenType::Num, "1".to_string()),
+                    (TokenType::Minus, "-".to_string()),
+                    (TokenType::Num, "2".to_string()),
+                    (TokenType::Semicolon, ";".to_string()),
+                ],
+            ),
+            (
+                "1 * ( 12 / 4);",
+                vec![
+                    (TokenType::Num, "1".to_string()),
+                    (TokenType::Multiply, "*".to_string()),
+                    (TokenType::LeftParathesis, "(".to_string()),
+                    (TokenType::Num, "12".to_string()),
+                    (TokenType::Divide, "/".to_string()),
+                    (TokenType::Num, "4".to_string()),
+                    (TokenType::RightParathesis, ")".to_string()),
+                    (TokenType::Semicolon, ";".to_string()),
+                ],
+            ),
+            (
+                "1 + 2; 2 + 3;",
+                vec![
+                    (TokenType::Num, "1".to_string()),
+                    (TokenType::Plus, "+".to_string()),
+                    (TokenType::Num, "2".to_string()),
+                    (TokenType::Semicolon, ";".to_string()),
+                    (TokenType::Num, "2".to_string()),
+                    (TokenType::Plus, "+".to_string()),
+                    (TokenType::Num, "3".to_string()),
+                    (TokenType::Semicolon, ";".to_string()),
+                ],
+            ),
+        ];
+
+        for (input, expected) in inputs {
+            let input_feed = InputFeed::new(input.to_string());
+            let _symbol_table = SymbolTable::new();
+
+            let results = lexan(input_feed, _symbol_table);
+
+            assert_eq!(results, expected);
+        }
+    }
 }

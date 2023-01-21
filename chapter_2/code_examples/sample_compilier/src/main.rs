@@ -1,18 +1,17 @@
 mod feed;
-mod tokens;
-mod symbols;
 mod lexan;
 mod parser;
+mod symbols;
+mod tokens;
 
 use std::env;
 use std::fs::File;
 use std::io::Read;
 use std::process::ExitCode;
 
-use crate::symbols::SymbolTable;
 use crate::lexan::lexan;
 use crate::parser::Parser;
-
+use crate::symbols::SymbolTable;
 
 fn get_input_string(path: &str) -> String {
     let mut result = String::new();
