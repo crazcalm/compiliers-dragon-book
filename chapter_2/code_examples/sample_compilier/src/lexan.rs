@@ -75,13 +75,14 @@ pub fn lexan(mut input_feed: impl Feed, _symbol_table: impl SymbolTableTrait) ->
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::feed::InputFeed;
     use crate::symbols::SymbolTable;
     use crate::tokens::TokenType;
 
+    use super::lexan;
+
     #[test]
-    fn test() {
+    fn test_tokonization() {
         let inputs = vec![
             (
                 "1 + 1",

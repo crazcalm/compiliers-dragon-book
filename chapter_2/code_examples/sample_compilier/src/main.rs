@@ -38,7 +38,9 @@ fn main() -> ExitCode {
     let processed_tokens = lexan(input_feed, symbol_table);
 
     let mut parser = Parser::new(processed_tokens);
-    parser.parse();
+    let result = parser.parse();
+
+    println!("{}", result);
 
     return ExitCode::SUCCESS;
 }

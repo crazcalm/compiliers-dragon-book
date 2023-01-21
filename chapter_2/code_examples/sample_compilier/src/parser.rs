@@ -5,6 +5,7 @@ use crate::tokens::{Token, TokenType};
 pub struct Parser {
     tokens: VecDeque<Token>,
     look_ahead: Option<Token>,
+    results: String,
 }
 
 impl Parser {
@@ -18,18 +19,22 @@ impl Parser {
         Parser {
             tokens: tokens_vecdeq,
             look_ahead: None,
+            results: "".to_string(),
         }
     }
 
-    pub fn parse(&mut self) {
+    pub fn parse(&mut self) -> String {
         self.look_ahead = self.tokens.pop_front();
 
         while self.look_ahead.is_some() {
             self.expr();
             self.match_token((TokenType::Semicolon, ";".to_string()));
+
             // adding a new line to create space
-            println!();
+            self.results.push_str("\n");
         }
+
+        self.results.clone()
     }
 
     pub fn expr(&mut self) {
@@ -43,7 +48,10 @@ impl Parser {
                         current_token.1.clone().to_string(),
                     ));
                     self.term();
-                    print!("{}", current_token.1);
+
+                    // Adding to result string
+                    self.results.push_str(current_token.1.as_str());
+                    self.results.push_str(" ");
                 }
                 _ => {
                     break;
@@ -53,8 +61,11 @@ impl Parser {
     }
 
     pub fn match_token(&mut self, wanted_token: Token) {
-        let current_token = self.look_ahead.clone().unwrap();
-        //println!("Wanted {:?}, Current: {:?}", &wanted_token, current_token);
+        let current_token = self
+            .look_ahead
+            .clone()
+            .expect("Are you missing a semicolon?");
+
         if current_token.eq(&wanted_token) {
             self.look_ahead = self.tokens.pop_front();
         } else {
@@ -74,7 +85,10 @@ impl Parser {
                         current_token.1.clone().to_string(),
                     ));
                     self.factor();
-                    print!("{}", current_token.1);
+
+                    // Adding to result string
+                    self.results.push_str(current_token.1.as_str());
+                    self.results.push_str(" ");
                 }
                 _ => {
                     break;
@@ -92,11 +106,17 @@ impl Parser {
                 self.match_token((TokenType::RightParathesis, ')'.to_string()));
             }
             TokenType::Num => {
-                print!("{:?}", current_token.1);
+                // Adding to result string
+                self.results.push_str(current_token.1.as_str());
+                self.results.push_str(" ");
+
                 self.match_token((TokenType::Num, current_token.1.to_string()));
             }
             TokenType::Id => {
-                print!("{:?}", current_token.1);
+                // Adding to result string
+                self.results.push_str(current_token.1.as_str());
+                self.results.push_str(" ");
+
                 self.match_token((TokenType::Id, current_token.1.to_string()));
             }
             _ => {
@@ -105,6 +125,58 @@ impl Parser {
                     &format!("Unexpected look ahead character: {}", &current_token.1)
                 )
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parser() {
+        let inputs = vec![
+            (
+                vec![
+                    (TokenType::Num, "1".to_string()),
+                    (TokenType::Plus, "+".to_string()),
+                    (TokenType::Num, "1".to_string()),
+                    (TokenType::Semicolon, ";".to_string()),
+                ],
+                "1 1 + \n".to_string(),
+            ),
+            (
+                vec![
+                    (TokenType::Num, "1".to_string()),
+                    (TokenType::Multiply, "*".to_string()),
+                    (TokenType::LeftParathesis, "(".to_string()),
+                    (TokenType::Num, "12".to_string()),
+                    (TokenType::Divide, "/".to_string()),
+                    (TokenType::Num, "4".to_string()),
+                    (TokenType::RightParathesis, ")".to_string()),
+                    (TokenType::Semicolon, ";".to_string()),
+                ],
+                "1 12 4 / * \n".to_string(),
+            ),
+            (
+                vec![
+                    (TokenType::Num, "1".to_string()),
+                    (TokenType::Plus, "+".to_string()),
+                    (TokenType::Num, "2".to_string()),
+                    (TokenType::Semicolon, ";".to_string()),
+                    (TokenType::Num, "2".to_string()),
+                    (TokenType::Plus, "+".to_string()),
+                    (TokenType::Num, "3".to_string()),
+                    (TokenType::Semicolon, ";".to_string()),
+                ],
+                "1 2 + \n2 3 + \n".to_string(),
+            ),
+        ];
+
+        for (input, expected) in inputs {
+            let results = Parser::new(input).parse();
+
+            assert_eq!(results, expected);
         }
     }
 }
