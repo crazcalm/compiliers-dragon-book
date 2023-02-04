@@ -23,21 +23,21 @@ enum TenValue {
 }
 
 enum HundredValue {
-    OneHundred,
-    TwoHundred,
-    ThreeHundred,
-    FourHundred,
-    FiveHundred,
-    SixHundred,
-    SevenHundred,
-    EightHundred,
-    NineHundred,
+    One,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
 }
 
 enum ThousandValue {
-    OneThousand,
-    TwoThousand,
-    ThreeThousand,
+    One,
+    Two,
+    Three,
 }
 
 enum Token {
@@ -72,20 +72,20 @@ fn token_value(token: Token) -> String {
             TenValue::Ninty => "XC".to_string(),
         },
         Token::Hundred(hundred_value) => match hundred_value {
-            HundredValue::OneHundred => "C".to_string(),
-            HundredValue::TwoHundred => "CC".to_string(),
-            HundredValue::ThreeHundred => "CCC".to_string(),
-            HundredValue::FourHundred => "CD".to_string(),
-            HundredValue::FiveHundred => "D".to_string(),
-            HundredValue::SixHundred => "DC".to_string(),
-            HundredValue::SevenHundred => "DCC".to_string(),
-            HundredValue::EightHundred => "DCCC".to_string(),
-            HundredValue::NineHundred => "CM".to_string(),
+            HundredValue::One => "C".to_string(),
+            HundredValue::Two => "CC".to_string(),
+            HundredValue::Three => "CCC".to_string(),
+            HundredValue::Four => "CD".to_string(),
+            HundredValue::Five => "D".to_string(),
+            HundredValue::Six => "DC".to_string(),
+            HundredValue::Seven => "DCC".to_string(),
+            HundredValue::Eight => "DCCC".to_string(),
+            HundredValue::Nine => "CM".to_string(),
         },
         Token::Thousand(thousand_value) => match thousand_value {
-            ThousandValue::OneThousand => "M".to_string(),
-            ThousandValue::TwoThousand => "MM".to_string(),
-            ThousandValue::ThreeThousand => "MMM".to_string(),
+            ThousandValue::One => "M".to_string(),
+            ThousandValue::Two => "MM".to_string(),
+            ThousandValue::Three => "MMM".to_string(),
         },
     }
 }
@@ -115,33 +115,18 @@ mod tests {
             (Token::Ten(TenValue::Seventy), "LXX".to_string()),
             (Token::Ten(TenValue::Eighty), "LXXX".to_string()),
             (Token::Ten(TenValue::Ninty), "XC".to_string()),
-            (Token::Hundred(HundredValue::OneHundred), "C".to_string()),
-            (Token::Hundred(HundredValue::TwoHundred), "CC".to_string()),
-            (
-                Token::Hundred(HundredValue::ThreeHundred),
-                "CCC".to_string(),
-            ),
-            (Token::Hundred(HundredValue::FourHundred), "CD".to_string()),
-            (Token::Hundred(HundredValue::FiveHundred), "D".to_string()),
-            (Token::Hundred(HundredValue::SixHundred), "DC".to_string()),
-            (
-                Token::Hundred(HundredValue::SevenHundred),
-                "DCC".to_string(),
-            ),
-            (
-                Token::Hundred(HundredValue::EightHundred),
-                "DCCC".to_string(),
-            ),
-            (Token::Hundred(HundredValue::NineHundred), "CM".to_string()),
-            (Token::Thousand(ThousandValue::OneThousand), "M".to_string()),
-            (
-                Token::Thousand(ThousandValue::TwoThousand),
-                "MM".to_string(),
-            ),
-            (
-                Token::Thousand(ThousandValue::ThreeThousand),
-                "MMM".to_string(),
-            ),
+            (Token::Hundred(HundredValue::One), "C".to_string()),
+            (Token::Hundred(HundredValue::Two), "CC".to_string()),
+            (Token::Hundred(HundredValue::Three), "CCC".to_string()),
+            (Token::Hundred(HundredValue::Four), "CD".to_string()),
+            (Token::Hundred(HundredValue::Five), "D".to_string()),
+            (Token::Hundred(HundredValue::Six), "DC".to_string()),
+            (Token::Hundred(HundredValue::Seven), "DCC".to_string()),
+            (Token::Hundred(HundredValue::Eight), "DCCC".to_string()),
+            (Token::Hundred(HundredValue::Nine), "CM".to_string()),
+            (Token::Thousand(ThousandValue::One), "M".to_string()),
+            (Token::Thousand(ThousandValue::Two), "MM".to_string()),
+            (Token::Thousand(ThousandValue::Three), "MMM".to_string()),
         ];
 
         for (input, expected) in test_cases {

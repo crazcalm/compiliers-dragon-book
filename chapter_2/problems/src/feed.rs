@@ -17,7 +17,7 @@ impl InputFeed {
 
         InputFeed {
             seen: vec![],
-            not_seen: not_seen,
+            not_seen,
         }
     }
 }
@@ -25,7 +25,7 @@ impl InputFeed {
 impl Feed for InputFeed {
     fn get_char(&mut self) -> Option<char> {
         if let Some(next_char) = self.not_seen.pop_front() {
-            self.seen.push(next_char.clone());
+            self.seen.push(next_char);
             return Some(next_char);
         };
         None
@@ -33,7 +33,7 @@ impl Feed for InputFeed {
 
     fn unget_char(&mut self) -> Option<char> {
         if let Some(prev_char) = self.seen.pop() {
-            self.not_seen.push_front(prev_char.clone());
+            self.not_seen.push_front(prev_char);
             return Some(prev_char);
         }
         None
