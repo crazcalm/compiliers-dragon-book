@@ -1,5 +1,5 @@
-mod feed;
-mod roman_tokens;
+pub mod feed;
+pub mod roman_tokens;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right

@@ -1,4 +1,5 @@
-enum UnitValue {
+#[derive(Debug, PartialEq, Eq)]
+pub enum UnitValue {
     One,
     Two,
     Three,
@@ -10,7 +11,8 @@ enum UnitValue {
     Nine,
 }
 
-enum TenValue {
+#[derive(Debug, PartialEq, Eq)]
+pub enum TenValue {
     Ten,
     Twenty,
     Thirty,
@@ -22,7 +24,8 @@ enum TenValue {
     Ninty,
 }
 
-enum HundredValue {
+#[derive(Debug, PartialEq, Eq)]
+pub enum HundredValue {
     One,
     Two,
     Three,
@@ -34,20 +37,23 @@ enum HundredValue {
     Nine,
 }
 
-enum ThousandValue {
+#[derive(Debug, PartialEq, Eq)]
+pub enum ThousandValue {
     One,
     Two,
     Three,
 }
 
-enum Token {
+#[derive(Debug, PartialEq, Eq)]
+pub enum Token {
     Unit(UnitValue),
     Ten(TenValue),
     Hundred(HundredValue),
     Thousand(ThousandValue),
+    EOF,
 }
 
-fn token_value(token: Token) -> String {
+pub fn token_value(token: Token) -> String {
     match token {
         Token::Unit(unit_value) => match unit_value {
             UnitValue::One => "I".to_string(),
@@ -87,6 +93,7 @@ fn token_value(token: Token) -> String {
             ThousandValue::Two => "MM".to_string(),
             ThousandValue::Three => "MMM".to_string(),
         },
+        Token::EOF => ";".to_string(),
     }
 }
 
