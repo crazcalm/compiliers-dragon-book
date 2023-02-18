@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum UnitValue {
     One,
     Two,
@@ -11,7 +11,7 @@ pub enum UnitValue {
     Nine,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum TenValue {
     Ten,
     Twenty,
@@ -24,7 +24,7 @@ pub enum TenValue {
     Ninty,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum HundredValue {
     One,
     Two,
@@ -37,14 +37,14 @@ pub enum HundredValue {
     Nine,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum ThousandValue {
     One,
     Two,
     Three,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Token {
     Unit(UnitValue),
     Ten(TenValue),

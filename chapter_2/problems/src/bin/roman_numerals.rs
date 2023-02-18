@@ -1,5 +1,173 @@
+use std::collections::VecDeque;
+
 use problems::feed::{Feed, InputFeed};
 use problems::roman_tokens::{HundredValue, TenValue, ThousandValue, Token, UnitValue};
+
+pub fn token_to_value(token: Token) -> i32 {
+    match token {
+        Token::Thousand(value) => match value {
+            ThousandValue::One => 1000,
+            ThousandValue::Two => 2000,
+            ThousandValue::Three => 3000,
+        },
+        Token::Hundred(value) => match value {
+            HundredValue::One => 100,
+            HundredValue::Two => 200,
+            HundredValue::Three => 300,
+            HundredValue::Four => 400,
+            HundredValue::Five => 500,
+            HundredValue::Six => 600,
+            HundredValue::Seven => 700,
+            HundredValue::Eight => 800,
+            HundredValue::Nine => 900,
+        },
+        Token::Ten(value) => match value {
+            TenValue::Ten => 10,
+            TenValue::Twenty => 20,
+            TenValue::Thirty => 30,
+            TenValue::Fourty => 40,
+            TenValue::Fifty => 50,
+            TenValue::Sixty => 60,
+            TenValue::Seventy => 70,
+            TenValue::Eighty => 80,
+            TenValue::Ninty => 90,
+        },
+        Token::Unit(value) => match value {
+            UnitValue::One => 1,
+            UnitValue::Two => 2,
+            UnitValue::Three => 3,
+            UnitValue::Four => 4,
+            UnitValue::Five => 5,
+            UnitValue::Six => 6,
+            UnitValue::Seven => 7,
+            UnitValue::Eight => 8,
+            UnitValue::Nine => 9,
+        },
+        Token::EOF => 0,
+    }
+}
+
+pub struct Parser {
+    tokens: VecDeque<Token>,
+    look_ahead: Option<Token>,
+    result: i32,
+}
+
+impl Parser {
+    pub fn new(tokens: Vec<Token>) -> Self {
+        let mut tokens_vecdeq = VecDeque::new();
+
+        for item in tokens {
+            tokens_vecdeq.push_back(item);
+        }
+
+        Parser {
+            tokens: tokens_vecdeq,
+            look_ahead: None,
+            result: 0,
+        }
+    }
+
+    pub fn parse(&mut self) -> i32 {
+        self.look_ahead = self.tokens.pop_front();
+
+        if let Some(current_token) = self.look_ahead.clone() {
+            match current_token {
+                Token::Thousand(thousand_value) => {
+                    let value = token_to_value(Token::Thousand(thousand_value));
+
+                    self.result += value;
+
+                    // Parse next token
+                    self.hundred_or_lower();
+                }
+                Token::Hundred(hundred_value) => {
+                    self.result += token_to_value(Token::Hundred(hundred_value));
+
+                    // Parse next token
+                    self.ten_or_lower();
+                }
+                Token::Ten(ten_value) => {
+                    self.result += token_to_value(Token::Ten(ten_value));
+
+                    // Parse next token
+                    self.unit_or_lower();
+                }
+                Token::Unit(unit_value) => {
+                    self.result += token_to_value(Token::Unit(unit_value));
+
+                    match self.tokens.pop_front() {
+                        Some(token) => panic!("unexpected extra token: {:?}", token),
+                        None => {}
+                    }
+                }
+                Token::EOF => {}
+            };
+        }
+
+        self.result
+    }
+
+    pub fn hundred_or_lower(&mut self) {
+        self.look_ahead = self.tokens.pop_front();
+        let current_token = self.look_ahead.clone().unwrap();
+
+        match current_token {
+            Token::Hundred(hundred_value) => {
+                self.result += token_to_value(Token::Hundred(hundred_value));
+
+                // Parse next token
+                self.ten_or_lower();
+            }
+            Token::Ten(ten_value) => {
+                self.result += token_to_value(Token::Ten(ten_value));
+
+                // Parse next token
+                self.unit_or_lower();
+            }
+            Token::Unit(unit_value) => {
+                self.result += token_to_value(Token::Unit(unit_value));
+            }
+            Token::EOF => {}
+            _ => panic!("unexpected token: {:?}", current_token),
+        }
+    }
+    pub fn ten_or_lower(&mut self) {
+        self.look_ahead = self.tokens.pop_front();
+        let current_token = self.look_ahead.clone().unwrap();
+
+        match current_token {
+            Token::Ten(ten_value) => {
+                self.result += token_to_value(Token::Ten(ten_value));
+
+                // Parse next token
+                self.unit_or_lower();
+            }
+            Token::Unit(unit_value) => {
+                self.result += token_to_value(Token::Unit(unit_value));
+            }
+            Token::EOF => {}
+            _ => panic!("unexpected token: {:?}", current_token),
+        }
+    }
+    pub fn unit_or_lower(&mut self) {
+        self.look_ahead = self.tokens.pop_front();
+        let current_token = self.look_ahead.clone().unwrap();
+
+        match current_token {
+            Token::Unit(unit_value) => {
+                self.result += token_to_value(Token::Unit(unit_value));
+
+                match self.tokens.pop_front() {
+                    Some(token) => panic!("unexpected extra token: {:?}", token),
+                    None => {}
+                }
+            }
+            Token::EOF => {}
+            _ => panic!("unexpected token: {:?}", current_token),
+        }
+    }
+}
 
 fn lexan(mut input: InputFeed) -> Vec<Token> {
     let mut result = Vec::new();
@@ -275,13 +443,95 @@ fn lexan(mut input: InputFeed) -> Vec<Token> {
 fn main() {
     let testing = "XXXIX;";
 
-    let mut input = InputFeed::new(testing.to_string());
-    println!("{}", input.get_char().unwrap());
+    let input = InputFeed::new(testing.to_string());
+    let tokens = lexan(input);
+
+    let mut parser = Parser::new(tokens);
+    let result = parser.parse();
+
+    println!("{} --> {}", testing, result);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_parser() {
+        let test_cases = vec![
+            (
+                vec![
+                    Token::Thousand(ThousandValue::Three),
+                    Token::Hundred(HundredValue::Seven),
+                    Token::Ten(TenValue::Fifty),
+                    Token::Unit(UnitValue::Two),
+                ],
+                3752,
+            ),
+            (
+                vec![
+                    Token::Hundred(HundredValue::Seven),
+                    Token::Ten(TenValue::Fifty),
+                    Token::Unit(UnitValue::Two),
+                ],
+                752,
+            ),
+            (
+                vec![Token::Ten(TenValue::Fifty), Token::Unit(UnitValue::Two)],
+                52,
+            ),
+            (vec![Token::Unit(UnitValue::Two)], 2),
+        ];
+
+        for (tokens, expected) in test_cases {
+            let mut parser = Parser::new(tokens);
+            let result = parser.parse();
+
+            assert_eq!(result, expected);
+        }
+    }
+
+    #[test]
+    fn test_toke_to_value() {
+        let test_cases = vec![
+            (Token::Thousand(ThousandValue::Three), 3000),
+            (Token::Thousand(ThousandValue::Two), 2000),
+            (Token::Thousand(ThousandValue::One), 1000),
+            (Token::Hundred(HundredValue::One), 100),
+            (Token::Hundred(HundredValue::Two), 200),
+            (Token::Hundred(HundredValue::Three), 300),
+            (Token::Hundred(HundredValue::Four), 400),
+            (Token::Hundred(HundredValue::Five), 500),
+            (Token::Hundred(HundredValue::Six), 600),
+            (Token::Hundred(HundredValue::Seven), 700),
+            (Token::Hundred(HundredValue::Eight), 800),
+            (Token::Hundred(HundredValue::Nine), 900),
+            (Token::Ten(TenValue::Ten), 10),
+            (Token::Ten(TenValue::Twenty), 20),
+            (Token::Ten(TenValue::Thirty), 30),
+            (Token::Ten(TenValue::Fourty), 40),
+            (Token::Ten(TenValue::Fifty), 50),
+            (Token::Ten(TenValue::Sixty), 60),
+            (Token::Ten(TenValue::Seventy), 70),
+            (Token::Ten(TenValue::Eighty), 80),
+            (Token::Ten(TenValue::Ninty), 90),
+            (Token::Unit(UnitValue::One), 1),
+            (Token::Unit(UnitValue::Two), 2),
+            (Token::Unit(UnitValue::Three), 3),
+            (Token::Unit(UnitValue::Four), 4),
+            (Token::Unit(UnitValue::Five), 5),
+            (Token::Unit(UnitValue::Six), 6),
+            (Token::Unit(UnitValue::Seven), 7),
+            (Token::Unit(UnitValue::Eight), 8),
+            (Token::Unit(UnitValue::Nine), 9),
+        ];
+
+        for (token, expected) in test_cases {
+            let result = token_to_value(token);
+
+            assert_eq!(result, expected);
+        }
+    }
 
     #[test]
     fn test_lexan() {
